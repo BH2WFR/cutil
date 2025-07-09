@@ -1,0 +1,100 @@
+{
+	//* 代替 cmakeSettings.json, 脱离 vs, 使用 vscode 构建项目
+	"version": 5, //* presets版本, 越高cmake要求版本越高, vs 最高支持版本 5
+	//参考: https://cmake.org/cmake/help/latest/manual/cmake-presets.7.html
+	"cmakeMinimumRequired": {"major": 3, "minor": 23}, // cmake 最低支持版本 v3.23
+	
+	"configurePresets": [
+		{//* ninja-MSVC-x64-debug
+			"name":"Ninja-MS-D",
+			"displayName": "Ninja-MS-D",
+			"description": "Ninja MSVC Windows x64 Debug",
+			
+			"generator": "Ninja",
+			"binaryDir": "${sourceDir}/build/${presetName}",
+			"cacheVariables": {
+				"CMAKE_BUILD_TYPE": "Debug",
+				"CMAKE_C_COMPILER": "cl", "CMAKE_CXX_COMPILER": "cl", //* 使用 MSVC 编译器
+				"CMAKE_INSTALL_PREFIX": "${sourceDir}/INSTALL/",
+				"CMAKE_EXPORT_COMPILE_COMMANDS": "True" //给 clangd 导出符号
+			},
+			"architecture": {
+				"value": "x64", //必须 64 位
+				"strategy": "external"
+			},
+			"toolset":{
+				"value":"host=x64",
+				"strategy":"external"
+			}
+		},
+		{//* ninja-MSVC-x64-release
+			"name":"Ninja-MS-R",
+			"displayName": "Ninja-MS-R",
+			"description": "Ninja MSVC Windows x64 Release",
+			
+			"inherits": "Ninja-MS-D", //* 从上面的配置继承其他设置
+			"cacheVariables": {
+				"CMAKE_BUILD_TYPE": "Release"
+			}
+		},
+		{
+			"name": "MinGW-x64-D",
+			"displayName": "MinGW-x64-D",
+			"generator": "Ninja",
+			"binaryDir": "${sourceDir}/build/${presetName}",
+			"cacheVariables": {
+				"CMAKE_BUILD_TYPE": "Debug",
+				"CMAKE_C_COMPILER": "gcc",
+				"CMAKE_CXX_COMPILER": "g++",
+				"CMAKE_INSTALL_PREFIX": "${sourceDir}/INSTALL",
+				"CMAKE_EXPORT_COMPILE_COMMANDS": "True"
+			},
+			"architecture": {
+				"value": "x64",
+				"strategy": "external"
+			},
+			"toolset": {
+				"value": "host=x64",
+				"strategy": "external"
+			}
+		},
+		{
+			"name": "MinGW-x64-R",
+			"displayName": "MinGW-x64-R",
+			"inherits": "MinGW-x64-D",
+			"cacheVariables": {
+				"CMAKE_BUILD_TYPE": "Release"
+			}
+		}
+	],
+	"buildPresets": [
+		{
+			"name": "Ninja-MS-D",
+			"displayName": "Ninja-MS-D",
+			"description": "Ninja MSVC Windows x64 Debug",
+			
+			"configurePreset": "Ninja-MS-D",
+			"configuration": "Debug"
+		},
+		{
+			"name": "Ninja-MS-R",
+			"displayName": "Ninja-MS-R",
+			"description": "Ninja MSVC Windows x64 Release",
+			
+			"configurePreset": "Ninja-MS-R",
+			"configuration": "Release"
+		},
+		{
+			"name": "MinGW-x64-D",
+			"displayName": "MinGW-x64-D",
+			"configurePreset": "MinGW-x64-D",
+			"configuration": "Debug"
+		},
+		{
+			"name": "MinGW-x64-R",
+			"displayName": "MinGW-x64-R",
+			"configurePreset": "MinGW-x64-R",
+			"configuration": "Release"
+		}
+	]
+}

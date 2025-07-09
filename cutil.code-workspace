@@ -1,0 +1,93 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"launch": {
+		"version": "0.2.0",
+		"configurations": [
+			{
+				"name": "vsdbg_Launch",
+				"type": "cppvsdbg",
+				"request": "launch",
+				"program": "${command:cmake.launchTargetPath}",
+				"args": [ //* 启动命令行参数
+					
+				],
+				"stopAtEntry": false,
+				"cwd": "${command:cmake.launchTargetDirectory}",
+				"console": "integratedTerminal", // 内部, 外部终端
+				"logging": {
+					"moduleLoad": false,
+					"trace": true,
+					"exceptions": true,
+					"programOutput": true,
+					"engineLogging": true,
+					"traceResponse": true
+				},
+				"environment": [
+					{
+						"name": "PATH",
+						"value": "${env:PATH};" //* 环境变量目录
+					}
+				],
+				"visualizerFile": "D:/Projects/3rdlibs/Qt_VS_natvis/qt6.natvis.xml"
+			},
+			{
+				"name": "vsdbg_Attach",
+				"type": "cppvsdbg",
+				"request": "attach",
+				"processId": "${command:pickProcess}",
+				"logging": {
+					"moduleLoad": false,
+					"trace": true
+				},
+				"visualizerFile": "D:/Projects/3rdlibs/Qt_VS_natvis/qt6.natvis.xml"
+			},
+			{
+				"name": "gdb_Launch",
+				"type": "cppdbg",
+				"request": "launch",
+				"program": "${command:cmake.launchTargetPath}",
+				"args": [ //* 启动命令行参数
+					
+				],
+				"stopAtEntry": false,
+				"cwd": "${command:cmake.launchTargetDirectory}",
+				"externalConsole": true, // 内部, 外部终端
+				// "MIMode": "gdb",
+				// "miDebuggerPath": "gdb.exe",  // 确保路径正确
+				"logging": {
+					"moduleLoad": false,
+					"trace": true,
+					"exceptions": true,
+					"programOutput": true,
+					"engineLogging": true,
+					"traceResponse": true
+				},
+				"environment": [
+					{
+						"name": "PATH",
+						"value": "${env:PATH};" //* 环境变量目录
+					}
+				],
+				
+				// "visualizerFile": "D:/Projects/3rdlibs/Qt_VS_natvis/qt6.natvis.xml"
+			},
+			{
+				"name": "gdb_Attach",
+				"type": "cppdbg",
+				"request": "attach",
+				"program": "${command:cmake.launchTargetPath}",
+				"processId": "${command:pickProcess}",
+				"logging": {
+					"moduleLoad": false,
+					"trace": true
+				},
+				// "visualizerFile": "D:/Projects/3rdlibs/Qt_VS_natvis/qt6.natvis.xml"
+			},
+		]
+	},
+	"settings": {}
+}
