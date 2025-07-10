@@ -12,7 +12,7 @@ Reference of Ansi Escape Codes:
 - [https://en.wikipedia.org/wiki/ANSI_escape_code](https://en.wikipedia.org/wiki/ANSI_escape_code)
 - [https://zh.wikipedia.org/wiki/ANSI%E8%BD%AC%E4%B9%89%E5%BA%8F%E5%88%97](https://zh.wikipedia.org/wiki/ANSI%E8%BD%AC%E4%B9%89%E5%BA%8F%E5%88%97)
 
-### Included Following External Header-Only Libraries & credits to:
+## Included Following External Header-Only Libraries & credits to:
 
 | **name**    | **author**     | **link**                                 | **path**                | **license** |
 | :---------- | :------------- | :--------------------------------------- | ----------------------- | :--------- |
@@ -56,8 +56,9 @@ Reference of Ansi Escape Codes:
   **cutil\:\:equal_all(...)**: `(compared == arg1 && compared == arg2 && compared == arg3 && ...)`
   **cutil\:\:unequal_all(...)**: `(compared != arg1 || compared != arg2 || compared != arg3 || ...)`
   **cutil\:\:uniqual_any(...)**: `(compared != arg1 && compared != arg2 && compared != arg3 && ...)`
-  **后续参数**与**第一个参数**，**有相等的**？全部相等？有不等的？**全部不等**（不是互不相等）？
-
+  
+  > **后续参数**与**第一个参数**，**有相等的**？全部相等？有不等的？**全部不等**（不是互不相等）？
+  
   ```c++
   int var = 10;
   if(cutil::equal_any(var, 2, 4, 6, 8, 10)){
@@ -78,7 +79,7 @@ Reference of Ansi Escape Codes:
     // equivalent to `if(! cutil::equal_all(var, 2, 4, 6, 8, 10))`
   }
   ```
-
+  
 - **cutil\:\:unequal_mutually(...)**: check if variables are mutually different.  **互不相等**
 
   > **If's recommended to use std::set<> if number of arguments is more than 5**. 参数在 5 以上，推荐使用 std::set<>
@@ -114,8 +115,9 @@ Reference of Ansi Escape Codes:
 ### Enum Utils 枚举实用工具
 
 - **cutil\:\:enum_int(enum_value)**
-  convert enum type to **underlying integer type**:
-  将枚举值 转化为 **该枚举类型对应的底层整型**
+  
+  > convert enum type to **underlying integer type**:
+  > 将枚举值 转化为 **该枚举类型对应的底层整型**
   
   ```c++
   enum class MyEnum : uint8_t {
@@ -130,9 +132,10 @@ Reference of Ansi Escape Codes:
   ```
   
 - **namespace cutil\:\:enum_bitwise**
-  **bitwise operations overloading** for **enum class**:
-  针对 **enum class** 的**位运算重载**:
-
+  
+  > **bitwise operations overloading** for **enum class**:
+  > 针对 **enum class** 的**位运算重载**:
+  
   ```c++
   using namespace cutil::enum_bitwise; // you must include this namespace to use bitwise operators
   auto flag  = MyEnum::Flag1 | MyEnum::Flag2;
@@ -147,8 +150,9 @@ Reference of Ansi Escape Codes:
 ### Convert Between Overload Functions 重载函数的函数指针转换
 
 - **cutil\:\:overload<...>(&function)**
-  for **non-member functions**, **static member functions** or **member functions without const overload**
-  非成员函数、静态成员函数、没有 const 重载的成员函数
+  
+  > for **non-member functions**, **static member functions** or **member functions without const overload**
+  > 非成员函数、静态成员函数、没有 const 重载的成员函数
   
   > referenced from qOverload<>() | 借鉴自 qOverload<>()
   
@@ -189,8 +193,9 @@ Reference of Ansi Escape Codes:
   
 - **cutil\:\:const_overload<...>(&function)**
   **cutil\:\:non_const_overload<...>(&function)**
-  for **member functions with const overload**
-  有 const 重载的成员函数
+  
+  > for **member functions with const overload**
+  > 有 const 重载的成员函数 
   
   ```c++
   EXPECT_EQ(0, (c.*cutil::non_const_overload<>(&ConvertTestClass::func))());
@@ -287,60 +292,83 @@ Reference of Ansi Escape Codes:
 
 ## \<cutil/cpp_math.hpp\>
 
-- **cutil\:\:numbers\:\:___
-  cutil\:\:Numbers\<T\>\:\:**___
-  Mathematical Constants** like `pi` for C++14/17, similar as `std::numbers` in C++20
-  针对 C++14/17 的**数学常量**, 与 C++20 中的 std\:\:numbers 类似
-
+- **cutil\:\:num\:\:\_\_\_ / cutil\:\:numbers\:\:\_\_\_**
+  **cutil\:\:Num\<T\>\:\:\_\_\_** / **cutil\:\:Numbers\<T\>\:\:\_\_\_**
+  
+  > Mathematical Constants** like `pi` for C++14/17, similar as `std::numbers` in C++20
+  > 针对 C++14/17 的**数学常量**, 与 C++20 中的 std\:\:numbers 类似
+  
   ```c++
-  float       pi      = cutil::numbers::pi_f;
-  double      pi      = cutil::numbers::pi;
-  long double pi_ld   = cutil::numbers::pi_ld
-  float       pi      = cutil::Numbers<float>::pi;
-  double      pi      = cutil::Numbers<double>::pi;
-  long double pi_ld   = cutil::Numbers<long double>::pi
+  float       pi      = cutil::num::pi_f;
+  double      pi      = cutil::num::pi;
+  long double pi_ld   = cutil::num::pi_ld
+  float       pi      = cutil::Num<float>::pi;
+  double      pi      = cutil::Num<double>::pi;
+  long double pi_ld   = cutil::Num<long double>::pi
+  
+  float var;
+  var = cutil::Num<float>::inf; // redirects to std::numeric_limits<float>::infinity()
+  var = cutil::Num<float>::neg_inf;
+  var = cutil::Num<float>::nan; // redirectes to std::numeric_limits<float>::quiet_NaN()
   ```
-
+  
 - **cutil\:\:fequal_eps(a, b, eps)**
   **cutil\:\:fequal_ulp(a, b, ulp)**
   **cutil\:\:fequal_zero(a)**
-  compare if two **floating numbers** could be regarded as equal by **epsilon** or **ULP**
-  基于 epsilon 或 ULP 方法比较两个浮点数是否可被认作相等
-
+  
+  > compare if two **floating numbers** could be regarded as equal by **epsilon** or **ULP**
+  > 基于 epsilon 或 ULP 方法比较两个浮点数是否可被认作相等
+  
   > available to use `fequal_eps` or  `fequal_zero` if compared number is near zero, otherwise recommended to use `fequal_ulp`
   > 当被比较浮点数接近 0 时, 可用 `fequal_eps` 或 `fequal_zero`, 否则建议使用 `fequal_ulp`.
   > `fequal_ulp` for `long double` is not tested for Linux, BE CAREFUL BEFORE USING. (long double is 8 bytes in windows, and 16 bytes in Linux)
   > 针对 `long double` 的 `fequal_ulp` 尚未在 Linux 中测试, 使用前请注意 (long double 在 windows 中为 8 字节, 在 linux 中为 16 字节)
   > `fequal_ulp` is not constexpr.
-
+  
 - **cutil\:\:pow(num, exp_int)**
   **cutil\:\:pow<exp_int>(num)**   `C++17`
-  power of a number, **with integer exponent**, unwrap to multiply itself for times.
-  指数为整数的乘方, 展开为多次自身相乘
-
+  
+  > power of a number, **with integer exponent**, unwrap to multiply itself for times.
+  > 指数为整数的乘方, 展开为多次自身相乘
+  
   > exponent number could be template argument since C++17, and it is recommended
   > 指数从 C++ 17 起可作为模板参数, 且推荐这样的写法
   > `std::pow` is for floating number exponents, sometimes it is inefficient if exponent is an integer and not too large
   > 标准库的 `std::pow` 是针对浮点数指数, 当指数为较小的整数时并不高效
   > referenced from  [](https://stackoverflow.com/questions/1505675/power-of-an-integer-in-c)
-
+  
   ```c++
   int ret = cutil::pow(2, 3); // generates `2*2*2`, 2^3 = 8
   int ret = cutil::pow<3>(2); // generates `2*2*2`, 2^3 = 8, >=C++17
   ```
-
+  
 - **cutil\:\:deg2rad(deg)**
   **cutil\:\:rad2deg(rad)**
-  convert an angle between **deg** and **rad** | **角度弧度互转**
-
+  
+  > convert an angle between **deg** and **rad** | **角度弧度互转**
+  
   ```c++
   double a = cutil::deg2rad(30.0);
   EXPECT_EQ(true, cutil::fequal_ulp(a, cutil::numbers::pi / 6.0));
   ```
-
+  
+- **cutil\:\:get_digit(num, digit)**
+  **cutil\:\:git_digit\<digit\>(num)**
+  
+  > get any digit of a decimal number | 获取十进制数的任意一位数
+  
+  ```c++
+  cutil::get_digit(12345, 0)      == 5; // get the last digit
+  cutil::get_digit<1>(12345)      == 4; // get the second last digit
+  cutil::get_digit(12345, 2)      == 3; // get the third last digit
+  cutil::get_digit(12345, -1)     == 0; // get the first digit after the decimal point
+  cutil::get_digit(123.456, -1)   == 6; // get the first digit after the decimal point
+  cutil::get_digit< -2>(123.456)  == 5; // get the second digit after the decimal point
+  ```
+  
 - **cutil\:\:lerp(a, b, t)**
 
-  Linear Interpolation `(a + (b-a) * t)` for C++14/17 |  针对 C++14/17 的线性插值
+  > Linear Interpolation `(a + (b-a) * t)` for C++14/17 |  针对 C++14/17 的线性插值
 
   > (redirects to `std::lerp` since C++20).
   > t should be in the range [0, 1]. if t = 0, returns a; if t == 1, returns b.
@@ -358,8 +386,9 @@ Reference of Ansi Escape Codes:
   **cutil\:\:cmp_less_equal(a, b)**
   **cutil\:\:cmp_greater(a, b)**
   **cutil\:\:cmp_greater_equal(a, b)**
-  SAFE signed/unsigned interger comparison for C++14/17
-  安全的有符号/无符号整数比较函数 (C++14/17)
+  
+  > SAFE signed/unsigned interger comparison for C++14/17
+  > 安全的有符号/无符号整数比较函数 (C++14/17)
   
   > redirects to std::cmp_equal, std::cmp_less, ... since C++20.
   
@@ -372,8 +401,9 @@ Reference of Ansi Escape Codes:
   ```
   
 - **cutil::in_range\<T\>(a)**
-  check if a value is within the range of a integer type for C++14/17
-  检查某个数值是否在某个整数型的可表示范围内 (C++14/17)
+  
+  > check if a value is within the range of a integer type for C++14/17
+  > 检查某个数值是否在某个整数型的可表示范围内 (C++14/17)
   
   > will be redirected to std::in_range since C++20.
   
@@ -385,11 +415,12 @@ Reference of Ansi Escape Codes:
   ```
   
 - **cutil\:\:midpoint(a, b)**
-  midpoint of two integer or floating point numbers for C++14/17
-  获取两个整数或浮点数的中间值 (针对 C++14/17)
-
+  
+  > midpoint of two integer or floating point numbers for C++14/17
+  > 获取两个整数或浮点数的中间值 (针对 C++14/17)
+  
   > redirects to `std::midpoint` since C++20.
-
+  
   ```c++
   EXPECT_EQ(cutil::math::midpoint(6.0, 9.0), 7.5);
   EXPECT_EQ(cutil::math::midpoint(6, 9), 7);
@@ -397,31 +428,34 @@ Reference of Ansi Escape Codes:
   
 - **cutil\:\:gcd(a, b)**
   **cutil\:\:lcm(a, b)**
-  Greatest Common Divisor (GCD), and Lease Common Multiple (LCM) for C++14
-  针对 C++14 的最大公因数, 最小公倍数
-
+  
+  > Greatest Common Divisor (GCD), and Lease Common Multiple (LCM) for C++14
+  > 针对 C++14 的最大公因数, 最小公倍数
+  
   > (redirects to `std::gcd` and `std::lcm` since C++17).
-
+  
 - **cutil\:\:clamp(var, min, max, comp)**
-  clamp the value between a range for C++14
-  将一个值 "夹" 在上下范围之间, 针对 C++14
-
+  
+  > clamp the value between a range for C++14
+  > 将一个值 "夹" 在上下范围之间, 针对 C++14
+  
   > redirects to `std::clamp()` since C++17
-
+  
   ```c++
   int a = 35, b = 26, c = 19, d = 35;
   d = std::clamp(d, 20, 30);          // C++17, equivalent to above
   d = cutil::math::clamp(d, 20, 30);  // C++14, equivalent to above
   d = cutil::math::clamp(d, 20, 30, std::less<int>()); // equivalent to above
   ```
-
+  
 - **cutil\:\:factorial(num)** :
-  factorial of an integer | 整数的阶乘
-
+  
+  > factorial of an integer | 整数的阶乘
+  
   ```c++
   int ret = cutil::factorial(3); // 3! = 6
   ```
-
+  
 - **increase or decrease** the number within a **range** (limit), or **increase or decrease rolling** within a **range**
 
 ----------
@@ -490,13 +524,95 @@ refers to:   [](https://github.com/ricab/scope_guard)
 
 ----------
 
-## \<cutil/cutils.h>
+## \<cutil/cpp_bits.h>
 
-  macros
+- **cutil\:\:get_bit_by_mask(num, bit_mask)**
+  **cutil\:\:set_bit_by_mask(num, bit_mask)**
+  **cutil\:\:clear_bit_by_mask(num, bit_mask)**
+  **cutil\:\:flip_bit_by_mask(num, bit_mask)**
+  **cutil\:\:check_bit_by_mask(num, bit_mask) -> bool**
+
+  > operate bit for unsigned integer by mask
+  > 用 遮罩 进行 无符号整数类型的位操作
+
+  ```c++
+  uint16_t num {0};
+  num = cutil::bit::set_bit_by_mask(num, 0x2B00);   // equals to {num = num |  0x2B00;}
+  num = cutil::bit::clear_bit_by_mask(num, 0x2B00); // equals to {num = num & ~0x2B00;}
+  num = cutil::bit::flip_bit_by_mask(num, 0x1100);  // equals to {num = num ^  0x1100;}
+  if(cutil::bit::get_bit_by_mask(num, 0x0022) != 0x0000) {}
+  if(cutil::bit::check_bit_by_mask(num, 0x0022) == true){} // reading bit, if bit is 1, returns `true`
+  ```
+
+- **cutil\:\:get_bit_by_idx(num, bit_idx)**
+  **cutil\:\:set_bit_by_idx(num, bit_idx)**
+  **cutil\:\:clear_bit_by_idx(num, bit_idx)**
+  **cutil\:\:flip_bit_by_idx(num, bit_idx)**
+  **cutil\:\:check_bit_by_idx(num, bit_idx) -> bool**
+
+  > operate bit for unsigned integer by idx, supports setting bits by once using `std::initializer_list<>`
+  > 用 位序号 进行 无符号整数类型的位操作, 支持使用 `std::initializer_list<>` 批量设置
+
+  ```c++
+  uint16_t num {0};
+  num = cutil::bit::set_bit_by_idx(num, 1);   // equals to {num = num |  (1u << 0));}
+  num = cutil::bit::clear_bit_by_idx(num, 2); // equals to {num = num & ~(1u << 2));}
+  num = cutil::bit::flip_bit_by_idx(num, 3);  // equals to {num = num ^  (1u << 3));}
+  num = cutil::bit::set_bit_by_idx(num, {0, 1, 3});   // initializer_list available
+  num = cutil::bit::clear_bit_by_idx(num, {0, 1, 3}); // initializer_list available
+  num = cutil::bit::flip_bit_by_idx(num, {0, 1, 3});  // initializer_list available
+  if(cutil::bit::get_bit_by_idx(num, 0) != 0x0000){}  // reading bit, if bit is 1, returns `(1<<bitIdx)`, NOT `1`
+  if(cutil::bit::check_bit_by_idx(num, 0) == true){}  // reading bit, if bit is 1, returns `true`
+  ```
+
+- **cutil\:\:insert_bit_left(num, inserted:bool)**
+  **cutil\:\:insert_bit_right(num, inserted:bool)**
+
+  > insert bit to the left, then shift others to right. `(bit >> 1) | (inserted << (bitSize - 1))`
+  > insert bit to the right, then shift others to left. `(bit << 1) | inserted`
+
+  ```c++
+  uint16_t var2 {0b0001'0010'0011'0100};
+  var2 = cutil::bit::insert_bit_left(var2, true);   -> 0b1000'1001'0001'1010
+  var2 = cutil::bit::insert_bit_right(var2, false); -> 0b0001'0010'0011'0100
+  ```
+
+- **cutil\:\:get_msb(num)**
+  **cutil\:\:get_lsb(num)**
+
+  > get msb (most significant bit, the leftmost bit)
+  > get lsb (least significant bit, the rightmost bit)
+
+- **cutil\:\:rotl(num)**
+  **cutil\:\:rotr(num)**
+
+  > rotate bit left/right by step for C++14/17 | 循环位移, 针对 C++14/17
+  > redirects to `std::rotl` and `std::rotr` since C++20.
+
+  ```c++
+  uint16_t var {0b0001'0010'0011'0100};
+  var = cutil::bit::rotate_bit_left(var, 1);  -> 0b0010'0100'0110'1000
+  var = cutil::bit::rotate_bit_right(var, 1); -> 0b0001'0010'0011'0100
+  var = cutil::bit::rotate_bit_left(var, 4);  -> 0b0010'0100'0110'1000
+  fmt::println("var={:#016b}", var);
+  ```
+
+- **cutil\:\:has_single_bit(num)**
+  **cutil\:\:is_power_of_2(num)**
+
+  > check if the lowest bit is 1, that is, check if the number is power of 2 ({1, 2, 4, 8...}),  (`== num != 0 && (num & (num - 1)) == 0`)
+  > 检测最低位是否为 1, 也就是检查是否为 2 的整数次方
+  > redirects to `std::has_single_bit` since C++20.
 
 ----------
 
-## \<cutil/console_utils.h>
+## \<cutil/cutils.h\>
+
+  **C macro version of above features**
+
+----------
+
+## \<cutil/console_utils.h\>
 
   Useful **ANSI Escape code** macros, and some functions for **console output**.
 
@@ -526,9 +642,7 @@ refers to:   [](https://github.com/ricab/scope_guard)
 2. **Control text cursor location** in console, or erase text.
 
    Move cursor: `CUp(2)`, `CDown(3)`, `CFwd(4)`, `CBack(5)`, `CNextLn(1)`, `CPrevLn(1)`,
-
-  `CHorzPos(12)`(column X, absolute), `CPos(44, 55)`(move the cursor to row 44, column 55)
-
+    `CHorzPos(12)`(column X, absolute), `CPos(44, 55)`(move the cursor to row 44, column 55)
    Just print them, use individual or append to string literals.
 
    ```c++
@@ -541,16 +655,16 @@ refers to:   [](https://github.com/ricab/scope_guard)
 3. **set console encoding**, console **window size** (in windows), or **console title**, also with pause program and force abort the program.
 
    ```c++
-   CUTIL_CHCP_ENCODING_UTF8(); 	// switch console encoding to UTF-8 (windows)
+   CUTIL_CHCP_ENCODING_UTF8(); // switch console encoding to UTF-8 (windows)
    CUTIL_CONSOLE_TITLE("MyProject"); // set console window title (calls SetConsoleTitleA() or SetConsoleTitleW() for windows, and print ansi escape code "\033]0;%s\007" for linux)
    // CUTIL_CONSOLE_TITLE(_TEXT("MyProgram"));
    // CUTIL_CONSOLE_TITLE_A("MyProgram");
    // CUTIL_CONSOLE_TITLE_W(L"MyProgram");
    
-   CUTIL_CONSOLE_SIZE(100, 30);	// set console window size to with of 30 chars and height of 30 lines (only available in windows)
-   CUTIL_CONSOLE_CLEAR();			// clear console (calls system("cls") )
+   CUTIL_CONSOLE_SIZE(100, 30); // set console window size to with of 30 chars and height of 30 lines (only available in windows)
+   CUTIL_CONSOLE_CLEAR(); // clear console (calls system("cls") )
    
-   printf("中文한글\n");	// you can correctly display this when the code saved in UTF-8 Encoding, especially in MSVC Compiler.
+   printf("中文한글\n"); // you can correctly display this when the code saved in UTF-8 Encoding, especially in MSVC Compiler.
    
    ```
 
@@ -572,12 +686,10 @@ refers to:   [](https://github.com/ricab/scope_guard)
    - set program locale to `UTF-8`
 
    ```c++
-   CUTIL_LOCALE_UTF8();            // setlocale(LC_ALL, ".UTF-8")
-   CUTIL_LOCALE_DEFAULT()			// setlocale(LC_ALL, "")
-   CUTIL_LOCALE_UTF8_PRINT()		// print if succeed or not
+   CUTIL_LOCALE_UTF8();  // setlocale(LC_ALL, ".UTF-8")
+   CUTIL_LOCALE_DEFAULT(); // setlocale(LC_ALL, "")
+   CUTIL_LOCALE_UTF8_PRINT(); // print if succeed or not
    ```
-
-   
 
 4. **Print Text only in Debug Build**, and do Not Print in Release Build.
 
@@ -585,9 +697,9 @@ refers to:   [](https://github.com/ricab/scope_guard)
 
    ```c++
    int a{1};
-   CUTIL_DEBUG_PRINTLN("debug text {}", a); 		// calls fmt::println()(fmtlib) or std::println()(C++23)
-   CUTIL_DEBUG_COUT("debug text " << a << '\n'); 	// calls std::cout <<
-   CUTIL_DEBUG_PRINTF("debug text %d", a); 		// calls printf()
+   CUTIL_DEBUG_PRINTLN("debug text {}", a); // calls fmt::println()(fmtlib) or std::println()(C++23)
+   CUTIL_DEBUG_COUT("debug text " << a << '\n'); // calls std::cout <<
+   CUTIL_DEBUG_PRINTF("debug text %d", a); // calls printf()
    // these function-like macros will DO NOTHING IN RELEASE BUILD.
    
    CUTIL_DEBUG_PRINTLN_ERR("debug stderr text {}", a); // print to stderr
@@ -596,21 +708,17 @@ refers to:   [](https://github.com/ricab/scope_guard)
    
    ```
 
-
-
 5. Flush the input buffer to ensure that subsequent "scanf()" or "cin" calls receive valid input.
 
    (吸收输入缓存区内的其余字符, 以便下次 scanf 或 cin 时能够获取到正确的输入内容)
 
    ```c++
-   // #define CUTIL_FLUSH_INPUT_BUFFER()	{char ch; while((ch = getchar()) != '\n') continue;}
+   // #define CUTIL_FLUSH_INPUT_BUFFER() {char ch; while((ch = getchar()) != '\n') continue;}
    int num1, num2;
    scanf("%d", &num1); // you inputed "123ss", then still remains characters "ss" in the input buffer
    CUTIL_CONSOLE_FLUSH_INPUTBUFFER(); // flush input buffer (clear)
    scanf("%d", &num2); // you can normally input other contents.
    ```
-
-
 
 6. **print argc and argv arguments** of main(int argc, char* argv[]) function in sequence.
 
@@ -623,49 +731,45 @@ refers to:   [](https://github.com/ricab/scope_guard)
 
    <img src="./assets/image-20240224195512767.png" alt="image-20240224195512767" style="zoom:67%;" />
 
-   
-
 7. **Print custom Error Message** with filename, line number and function name
 
    打印错误信息，并输出当前文件名、行号、函数名
-
-   
 
 8. **EXAMPLES for C**:
 
    ```c
    #include <locale.h>
    #include <stdio.h>
-   #include <windows.h>		// include other headers first
-   #include <fmt/core.h>		// include other headers first
+   #include <windows.h> // include other headers first
+   #include <fmt/core.h> // include other headers first
      
-   #include <cutil/console_utils.h> 	// include this header at last
+   #include <cutil/console_utils.h>  // include this header at last
      
    int main(int argc, char* argv[]){
-     CUTIL_CHCP_ENCODING_UTF8(); 		// switch console encoding to UTF-8 (windows)
-     CUTIL_LOCALE_UTF8_PRINT();			// set locale to UTF-8, and print the current locale
-     CUTIL_ENABLE_VIRTUAL_TERMINAL(); 	// enable virtual terminal processing in Windows console, so that ANSI escape codes can be used.
-     CUTIL_CONSOLE_TITLE(_TEXT("MyProject")); 	// set console window title
-     CUTIL_CONSOLE_SIZE(100, 30);		// set console window size to with of 30 chars and height of 30 lines.
-     CUTIL_CONSOLE_CLEAR();				// clear console (system("cls"))
+     CUTIL_CHCP_ENCODING_UTF8(); // switch console encoding to UTF-8 (windows)
+     CUTIL_LOCALE_UTF8_PRINT(); // set locale to UTF-8, and print the current locale
+     CUTIL_ENABLE_VIRTUAL_TERMINAL(); // enable virtual terminal processing in Windows console, so that ANSI escape codes can be used.
+     CUTIL_CONSOLE_TITLE(_TEXT("MyProject")); // set console window title
+     CUTIL_CONSOLE_SIZE(100, 30); // set console window size to with of 30 chars and height of 30 lines.
+     CUTIL_CONSOLE_CLEAR(); // clear console (system("cls"))
      
-     CUTIL_PRINT_ARGV(argc, argv);		// print all argc and argv[n] of main() function
+     CUTIL_PRINT_ARGV(argc, argv); // print all argc and argv[n] of main() function
      
-     printf(FLGreen "Hello World!\n" CRst);   	// print "Hello World" with light yellow console color formatting
+     printf(FLGreen "Hello World!\n" CRst); // print "Hello World" with light yellow console color formatting
                              you should put "CRst" at the end of string to RESET console font color to DEFAULT
-     printf(CStyle(FLGreen, "Hello World!\n")); 	// Equivalent
+     printf(CStyle(FLGreen, "Hello World!\n")); // Equivalent
      
-     fprintf(stderr, FLRed "ERROR\n" CRst);  	// print "ERROR" with font color light red, "CRst" is also needed to revert font color to default
-     fprintf(stderr, CStyle(FLRed, "ERROR\n"));	// Equivalent
+     fprintf(stderr, FLRed "ERROR\n" CRst); // print "ERROR" with font color light red, "CRst" is also needed to revert font color to default
+     fprintf(stderr, CStyle(FLRed, "ERROR\n")); // Equivalent
      
      printf(BRed FGreen CQFlash "test\n" CRst);  // Print text with green font and red background, and quickly flashing
      printf(CStyle(BRed FGreen CQFlash, "test\n"));// Equivalent
      
-     printf(CForward(2)); 					// move thr cursor 2 characters right, equals to `CRight(2)` or `CFwd(2)`.
+     printf(CForward(2)); // move thr cursor 2 characters right, equals to `CRight(2)` or `CFwd(2)`.
      
-     CUTIL_ERROR_MESSAGE("error occurred!"); 	// print an error message with filename, function name and line number ATTACHED.
+     CUTIL_ERROR_MESSAGE("error occurred!"); // print an error message with filename, function name and line number ATTACHED.
      
-     CUTIL_CONSOLE_PAUSE(); 			 		// system("pause");
+     CUTIL_CONSOLE_PAUSE(); // system("pause");
      return 0;
    }
    ```
@@ -677,29 +781,27 @@ refers to:   [](https://github.com/ricab/scope_guard)
    #include <iostream>
    #include <fmt/core.h> // optional
    #include <windows.h>  // windows only
-   #include <cutil/console_utils.h> 	// include this header at last
+   #include <cutil/console_utils.h>  // include this header at last
      
    int main(int argc, char* argv[]){
-     cutil::console::set_locale_utf8(); 			// set locale to UTF-8
-     cutil::console::set_chcp_encoding(cutil::console::Encodings::UTF8); // set console encoding to UTF-8, you can also use `set_chcp_encoding_utf8()`
-     cutil::console::enable_virtual_terminal();	// enable virtual terminal processing in Windows console, so that ANSI escape codes can be used.
-     cutil::console::set_title("MyProject"); 	// set console window title
-     cutil::console::set_size(100, 30); 			// set console window size to with of 30 chars and height of 30 lines.
-     cutil::console::clear(); 					// clear console (system("cls"))
+       cutil::console::set_locale_utf8(); // set locale to UTF-8
+       cutil::console::set_chcp_encoding(cutil::console::Encodings::UTF8); // set console encoding to UTF-8, you can also use `set_chcp_encoding_utf8()`
+       cutil::console::enable_virtual_terminal(); // enable virtual terminal processing in Windows console, so that ANSI escape codes can be used.
+       cutil::console::set_title("MyProject"); // set console window title
+       cutil::console::set_size(100, 30); // set console window size to with of 30 chars and height of 30 lines.
+       cutil::console::clear(); // clear console (system("cls"))
      
-     cutil::console::print_argv(argc, argv); 	// print all argc and argv[n] of main() function
+       cutil::console::print_argv(argc, argv); // print all argc and argv[n] of main() function
      
-     fmt::println(FLGreen "Hello World!" CRst); 	// print "Hello World" with light green console color formatting
-     fmt::println(stderr, FLRed "ERROR" CRst); 	// print "ERROR" with font color light red
+       fmt::println(FLGreen "Hello World!" CRst); // print "Hello World" with light green console color formatting
+       fmt::println(stderr, FLRed "ERROR" CRst); // print "ERROR" with font color light red
      
-     fmt::println(BRed FGreen CQFlash "test" CRst); // Print text with green font and red background, and quickly flashing
+       fmt::println(BRed FGreen CQFlash "test" CRst); // Print text with green font and red background, and quickly flashing
      
-     cutil::console::pause(); 					// system("pause");
-     return 0;
+       cutil::console::pause(); // system("pause");
+       return 0;
    }
    ```
-
-   
 
 10. **Console Effects 控制台效果** :
 
@@ -707,21 +809,11 @@ refers to:   [](https://github.com/ricab/scope_guard)
 
 <img src="./assets/Color Effect.png" alt="image-20240218101655956" style="zoom:67%;" />
 
-
-
--------
-
-## \<cutil/cpp_bits.hpp\>
-
-C++20 `<bit>` alternatives for C++14/17
-
->  in C++20, some functions will redirect to functions in standard library `<bit>` to get better performence.
-
 ----------
 
 ## \<cutil/cpp_string_utils.hpp\>
 
-refers to: https://github.com/Shot511/strutil
+refers to: [https://github.com/Shot511/strutil](https://github.com/Shot511/strutil)
 
 [namespace modified to `cutil::str::`]
 
@@ -730,8 +822,6 @@ refers to: https://github.com/Shot511/strutil
 1. Sanitize Filename
 2. convert std::string to numbers
 
-
-
 ## \<cutil/base/base.h\>
 
 > this header is included by all other headers
@@ -739,12 +829,11 @@ refers to: https://github.com/Shot511/strutil
 1. Get compiler type and version:
 
    ```c++
-   #ifdef CUTIL_COMPILER_CLANG
-   #ifdef CUTIL_COMPILER_GCC
    #ifdef CUTIL_COMPILER_MSVC
+   #ifdef CUTIL_COMPILER_GCC
+   #ifdef CUTIL_COMPILER_CLANG
    
    #ifdef CUTIL_COMPILER_MSVC_2022
-   #ifdef CUTIL_COMPILER_MINGW
    ```
 
 2. Get CPU architecture, bit width, features and endian type:
@@ -754,17 +843,16 @@ refers to: https://github.com/Shot511/strutil
    #ifdef CUTIL_CPU_ARCH_X86_64
    #ifdef CUTIL_CPU_ARCH_X86_32
    #ifdef CUTIL_CPU_ARCH_ARM
-   #ifdef CUTIL_CPU_ARCH_ARM64
-   #ifdef CUTIL_CPU_ARCH_ARM32
-   #ifdef CUTIL_CPU_ARCH_RISCV
+   #ifdef CUTIL_CPU_ARCH_ARM_64
+   #ifdef CUTIL_CPU_ARCH_ARM_32
    
    #ifdef CUTIL_CPU_ARCH_64BIT
    #ifdef CUTIL_CPU_ARCH_32BIT
    #if CUTIL_PTR_SIZE == 8
    #if CUTIL_PTR_SIZE == 4
    
-   #ifdef CUTIL_CPU_LITTLE_ENDIAN
-   #ifdef CUTIL_CPU_BIG_ENDIAN
+   #ifdef CUTIL_ENDIAN_LITTLE
+   #ifdef CUTIL_ENDIAN_BIG
    ```
 
 3. Get OS Type:
@@ -773,7 +861,7 @@ refers to: https://github.com/Shot511/strutil
    #ifdef CUTIL_OS_WINDOWS
    #ifdef CUTIL_OS_WINDOWS_64
    #ifdef CUTIL_OS_WINDOWS_32
-   #ifdef CUTIL_OS_WINDOWS_NOT_CYGWIN
+   #ifdef CUTIL_OS_CYGWIN
    #ifdef CUTIL_OS_LINUX
    #ifdef CUTIL_OS_MACOS
    ```
@@ -813,15 +901,15 @@ refers to: https://github.com/Shot511/strutil
 7. **count amount of arguments of a function-like macro**
 
    ```c++
-   int a = CUTIL_VA_CNT(); 			// -> 0
-   int b = CUTIL_VA_CNT(b1); 			// -> 1
-   int c = CUTIL_VA_CNT(c1, c2); 		// -> 2
-   int d = CUTIL_VA_CNT(c1, c2, c3); 	// -> 3
+   int a = CUTIL_VA_CNT();            // -> 0
+   int b = CUTIL_VA_CNT(b1);          // -> 1
+   int c = CUTIL_VA_CNT(c1, c2);      // -> 2
+   int d = CUTIL_VA_CNT(c1, c2, c3);  // -> 3
    ...
-   int a = CUTIL_VA_EXISTS(); 			// -> 0
-   int b = CUTIL_VA_EXISTS(b1); 		// -> 1
-   int c = CUTIL_VA_EXISTS(c1, c2); 	// -> 1
-   int d = CUTIL_VA_EXISTS(c1, c2, c3);// -> 1
+   int a = CUTIL_VA_EXISTS();           // -> 0
+   int b = CUTIL_VA_EXISTS(b1);         // -> 1
+   int c = CUTIL_VA_EXISTS(c1, c2);     // -> 1
+   int d = CUTIL_VA_EXISTS(c1, c2, c3); // -> 1
    ```
 
 8. **Overload C macros** by amount of arguments of function-like macro:
@@ -836,25 +924,19 @@ refers to: https://github.com/Shot511/strutil
    #define _CUTIL_EQUAL_ANY_5(_var, _1, ...)   CUTIL_EXPAND((_var) == (_1) || _CUTIL_EQUAL_ANY_4(_var, __VA_ARGS__))
    
    // usage:
-   if(CUTIL_EQUAL_ANY(a, 1, 2)) {} 		// if(a == 1 || a == 2)
-   if(CUTIL_EQUAL_ANY(a, 1, 2, 3, 4)) 		// if(a == 1 || a == 2 || a == 3 || a == 4)
+   if(CUTIL_EQUAL_ANY(a, 1, 2)) {}       // if(a == 1 || a == 2)
+   if(CUTIL_EQUAL_ANY(a, 1, 2, 3, 4))    // if(a == 1 || a == 2 || a == 3 || a == 4)
    ```
 
-   
-
-
-
---------
+----------
 
 ## \<cutil_externals/span.hpp\>
 
-refers to: https://github.com/tcbrindle/span
+refers to: [https://github.com/tcbrindle/span](https://github.com/tcbrindle/span)
 
 [namespace modified to `cutil::`]
 
-
-
--------
+----------
 
 ## \<cutil_externals/xorstr.hpp\>
 
@@ -864,11 +946,7 @@ refers to: https://github.com/qis/xorstr
 
 [namespace modified to `cutil::xorstr::`]
 
-
-
-
-
--------
+----------
 
 ## \<cutil_externals/magic_enum/magic_enum_all.hpp\>
 

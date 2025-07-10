@@ -12,37 +12,38 @@ Updated:		9 JUL 2025
 //* warning: do not use macros with name starting with underscore `_` externally.
 
 
+//* include vital C headers
+#ifdef __cplusplus
+	#include <cstdio>
+	#include <cstdlib>
+	#include <cstdint>
+	#include <cfloat>
+	#include <limits> // for epsilon of float
+#else //. !__cplusplus
+	#include <stdio.h>
+	#include <stdlib.h>
+	#include <stdint.h>	// uint32_t
+	#include <float.h>	// floating-point limits
+	#if defined(CUTIL_C99_SUPPORTED) && !defined(CUTIL_C23_SUPPORTED)
+		#include <stdbool.h> // bool support since C99, before C23 (became keyword)
+	#endif
+#endif // __cplusplus
+
+
 //* get compiler type and version
-#if defined(__clang__)
-    #define CUTIL_COMPILER_CLANG    1
-    #define CUTIL_COMPILER_NAME     "Clang"
-    #define CUTIL_COMPILER_VERSION  (__clang_major__ * 10000 + __clang_minor__ * 100 + __clang_patchlevel__)
-    #define CUTIL_COMPILER_VERSION_MAJOR __clang_major__
-    #define CUTIL_COMPILER_VERSION_MINOR __clang_minor__
-    #define CUTIL_COMPILER_VERSION_PATCH __clang_patchlevel__
-#elif defined(__INTEL_COMPILER) || defined(__ICC)
-    #define CUTIL_COMPILER_INTEL    1
-    #define CUTIL_COMPILER_NAME     "Intel C/C++"
-    #define CUTIL_COMPILER_VERSION  __INTEL_COMPILER
-    #define CUTIL_COMPILER_VERSION_MAJOR (__INTEL_COMPILER / 100)
-    #define CUTIL_COMPILER_VERSION_MINOR (__INTEL_COMPILER % 100)
-    #define CUTIL_COMPILER_VERSION_PATCH 0
-#elif defined(__GNUC__) || defined(__GNUG__)
-    #define CUTIL_COMPILER_GCC      1
-    #define CUTIL_COMPILER_NAME     "GCC"
-    #define CUTIL_COMPILER_VERSION  (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__)
-    #define CUTIL_COMPILER_VERSION_MAJOR __GNUC__
-    #define CUTIL_COMPILER_VERSION_MINOR __GNUC_MINOR__
-    #define CUTIL_COMPILER_VERSION_PATCH __GNUC_PATCHLEVEL__
-#elif defined(_MSC_VER)
-    #define CUTIL_COMPILER_MSVC     1
-    #define CUTIL_COMPILER_NAME     "MSVC"
-    #define CUTIL_COMPILER_VERSION  _MSC_VER
-    #define CUTIL_COMPILER_VERSION_MAJOR (_MSC_VER / 100)
-    #define CUTIL_COMPILER_VERSION_MINOR (_MSC_VER % 100)
-    #define CUTIL_COMPILER_VERSION_PATCH 0
-    // MSVC 特定版本检测
-    #if (_MSC_VER >= 1930)
+//  macro `CUTIL_COMPILER_XXX` is not unique
+//  if you are using mingw64, it will define both CUTIL_COMPILER_MINGW and CUTIL_COMPILER_MINGW64
+#if defined(_MSC_VER)
+    #define CUTIL_COMPILER_MSVC					1
+    #define CUTIL_COMPILER_MSVC_VERSION  		_MSC_VER // VVRR
+    #define CUTIL_COMPILER_MSVC_VERSION_MAJOR	(_MSC_VER / 100)
+    #define CUTIL_COMPILER_MSVC_VERSION_MINOR 	(_MSC_VER % 100)
+	#if (_MSC_FULL_VER > 99999999) // VVRRPPPP / VVRRPPPPP
+    	#define CUTIL_COMPILER_VERSION_PATCH	(_MSC_FULL_VER % 100000) // 194334604
+	#else
+		#define CUTIL_COMPILER_VERSION_PATCH 	(_MSC_FULL_VER % 10000) // 13103077
+	#endif
+    #if (_MSC_VER >= 1930) // 193x, 194x
         #define CUTIL_COMPILER_MSVC_2022  1 // Visual Studio 2022
     #elif (_MSC_VER >= 1920)
         #define CUTIL_COMPILER_MSVC_2019  1 // Visual Studio 2019
@@ -50,238 +51,195 @@ Updated:		9 JUL 2025
         #define CUTIL_COMPILER_MSVC_2017  1 // Visual Studio 2017
     #elif (_MSC_VER >= 1900)
         #define CUTIL_COMPILER_MSVC_2015  1 // Visual Studio 2015
+	#elif (_MSC_VER >= 1800)
+		#define CUTIL_COMPILER_MSVC_2013  1 // Visual Studio 2013
+	#elif (_MSC_VER >= 1700)
+		#define CUTIL_COMPILER_MSVC_2012  1 // Visual Studio 2012
+	#elif (_MSC_VER >= 1600)
+		#define CUTIL_COMPILER_MSVC_2010  1 // Visual Studio 2010
+	#elif (_MSC_VER >= 1500)
+		#define CUTIL_COMPILER_MSVC_2008  1 // Visual Studio 2008
+	#elif (_MSC_VER >= 1400)
+		#define CUTIL_COMPILER_MSVC_2005  1 // Visual Studio 2005
+	#elif (_MSC_VER >= 1300)
+		#define CUTIL_COMPILER_MSVC_2003  1 // Visual Studio .NET 2003
+	#elif (_MSC_VER >= 1200)
+		#define CUTIL_COMPILER_MSVC_6     1 // Visual Studio 6.0
     #endif
-#elif defined(__BORLANDC__) || defined(__CODEGEARC__)
-    #define CUTIL_COMPILER_BORLAND  1
-    #define CUTIL_COMPILER_NAME     "Borland/CodeGear"
-    #define CUTIL_COMPILER_VERSION  (defined(__CODEGEARC__) ? __CODEGEARC__ : __BORLANDC__)
-#elif defined(__MINGW32__) || defined(__MINGW64__)
-    #define CUTIL_COMPILER_MINGW    1
-    #define CUTIL_COMPILER_NAME     "MinGW"
-    #if defined(__MINGW64__)
-        #define CUTIL_COMPILER_MINGW64  1
-    #else
-        #define CUTIL_COMPILER_MINGW32  1
-    #endif
-#elif defined(__IBMC__) || defined(__IBMCPP__) || defined(__xlc__) || defined(__xlC__)
-    #define CUTIL_COMPILER_IBM      1
-    #define CUTIL_COMPILER_NAME     "IBM XL C/C++"
-    #if defined(__IBMC__)
-        #define CUTIL_COMPILER_VERSION __IBMC__
-    #else
-        #define CUTIL_COMPILER_VERSION __IBMCPP__
-    #endif
-#elif defined(__SUNPRO_C) || defined(__SUNPRO_CC)
-    #define CUTIL_COMPILER_SUNPRO   1
-    #define CUTIL_COMPILER_NAME     "Oracle/Sun Studio"
-    #if defined(__SUNPRO_C)
-        #define CUTIL_COMPILER_VERSION __SUNPRO_C
-    #else
-        #define CUTIL_COMPILER_VERSION __SUNPRO_CC
-    #endif
-#elif defined(__NVCC__)
-    #define CUTIL_COMPILER_NVCC     1
-    #define CUTIL_COMPILER_NAME     "NVIDIA CUDA"
-    #define CUTIL_COMPILER_VERSION  0 // NVCC不提供直接的版本宏
-#elif defined(__ARMCC_VERSION)
-    #define CUTIL_COMPILER_ARM      1
-    #define CUTIL_COMPILER_NAME     "ARM Compiler"
-    #define CUTIL_COMPILER_VERSION  __ARMCC_VERSION
-#elif defined(__IAR_SYSTEMS_ICC__)
-    #define CUTIL_COMPILER_IAR      1
-    #define CUTIL_COMPILER_NAME     "IAR C/C++"
-    #define CUTIL_COMPILER_VERSION  __VER__
-#elif defined(__TINYC__)
-    #define CUTIL_COMPILER_TINYC    1
-    #define CUTIL_COMPILER_NAME     "Tiny C"
-#elif defined(__DMC__)
-    #define CUTIL_COMPILER_DMC      1
-    #define CUTIL_COMPILER_NAME     "Digital Mars"
-    #define CUTIL_COMPILER_VERSION  __DMC__
-#elif defined(__EMSCRIPTEN__)
-    #define CUTIL_COMPILER_EMSCRIPTEN 1
-    #define CUTIL_COMPILER_NAME     "Emscripten"
-    #define CUTIL_COMPILER_VERSION  __EMSCRIPTEN_major__ * 10000 + __EMSCRIPTEN_minor__ * 100 + __EMSCRIPTEN_tiny__
-#elif defined(__PGI)
-    #define CUTIL_COMPILER_PGI      1
-    #define CUTIL_COMPILER_NAME     "Portland Group"
-    #define CUTIL_COMPILER_VERSION  __PGIC__ * 10000 + __PGIC_MINOR__ * 100 + __PGIC_PATCHLEVEL__
-#else
-    #define CUTIL_COMPILER_UNKNOWN  1
-    #define CUTIL_COMPILER_NAME     "Unknown"
-    #define CUTIL_COMPILER_VERSION  0
 #endif
+#if defined(__GNUC__)
+    #define CUTIL_COMPILER_GCC					1
+	#ifdef __GNUC_PATCHLEVEL__
+    	#define CUTIL_COMPILER_GCC_VERSION  	(__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__)
+		#define CUTIL_COMPILER_GCC_VERSION_PATCH 	__GNUC_PATCHLEVEL__
+	#else
+		#define CUTIL_COMPILER_GCC_VERSION  	(__GNUC__ * 10000 + __GNUC_MINOR__ * 100)
+	#endif
+    #define CUTIL_COMPILER_GCC_VERSION_MAJOR 	__GNUC__
+    #define CUTIL_COMPILER_GCC_VERSION_MINOR 	__GNUC_MINOR__
+#endif
+#if defined(__clang__)
+    #define CUTIL_COMPILER_CLANG    			1
+    #define CUTIL_COMPILER_CLANG_VERSION  		(__clang_major__ * 10000 + __clang_minor__ * 100 + __clang_patchlevel__)
+    #define CUTIL_COMPILER_CLANG_VERSION_MAJOR __clang_major__
+    #define CUTIL_COMPILER_CLANG_VERSION_MINOR __clang_minor__
+    #define CUTIL_COMPILER_CLANG_VERSION_PATCH __clang_patchlevel__
+#endif
+#if defined(__NVCC__) // CUDA compiler
+    #define CUTIL_COMPILER_NVCC					1
+#endif
+#if defined(__MINGW32__) || defined(__MINGW64__)
+    #define CUTIL_COMPILER_MINGW    			1
+    #if defined(__MINGW64__)
+        #define CUTIL_COMPILER_MINGW64  		1
+		#define CUTIL_COMPILER_MINGW_VERSION_MAJOR  __MINGW64_VERSION_MAJOR // 11
+		#define CUTIL_COMPILER_MINGW_VERSION_MINOR  __MINGW64_VERSION_MINOR // 0
+    #else
+        #define CUTIL_COMPILER_MINGW32  		1
+		#define CUTIL_COMPILER_MINGW_VERSION_MAJOR  __MINGW32_MAJOR_VERSION // 5
+		#define CUTIL_COMPILER_MINGW_VERSION_MINOR  __MINGW32_MINOR_VERSION // 1
+    #endif
+#endif
+#if defined(__INTEL_COMPILER) || defined(__ICC)
+    #define CUTIL_COMPILER_ICC					1
+    #define CUTIL_COMPILER_ICC_VERSION  		__INTEL_COMPILER // VRP
+    #define CUTIL_COMPILER_ICC_VERSION_MAJOR 	(__INTEL_COMPILER / 100)
+    #define CUTIL_COMPILER_ICC_VERSION_MINOR 	((__INTEL_COMPILER % 100) / 10)
+    #define CUTIL_COMPILER_ICC_VERSION_PATCH 	(__INTEL_COMPILER % 10)
+#endif
+#if defined(__CC_ARM)
+    #define CUTIL_COMPILER_ARMCC				1
+    #define CUTIL_COMPILER_ARMCC_VERSION  		__ARMCC_VERSION // VRPBBB
+	#define CUTIL_COMPILER_ARMCC_VERSION_MAJOR  (__ARMCC_VERSION / 100000)
+	#define CUTIL_COMPILER_ARMCC_VERSION_MINOR  ((__ARMCC_VERSION % 100000) / 10000)
+	#define CUTIL_COMPILER_ARMCC_VERSION_PATCH  ((__ARMCC_VERSION % 10000) / 1000)
+#endif
+#if defined(__IAR_SYSTEMS_ICC__)
+    #define CUTIL_COMPILER_IAR					1
+    #define CUTIL_COMPILER_VERSION				__VER__ // VRR
+	#define CUTIL_COMPILER_IAR_VERSION_MAJOR 	(__VER__ / 100)
+	#define CUTIL_COMPILER_IAR_VERSION_MINOR 	(__VER__ % 100)
+#endif
+#if defined(__BORLANDC__) || defined(__CODEGEARC__)
+    #define CUTIL_COMPILER_BORLAND				1
+	#if defined(__CODEGEARC__)
+		#define CUTIL_COMPILER_BORLAND_VERSION  	__CODEGEARC__
+	#else
+		#define CUTIL_COMPILER_BORLAND_VERSION  	__BORLANDC__
+	#endif
+#endif
+#if defined(__llvm__)
+	#define CUTIL_COMPILER_LLVM					1
+#endif
+
 
 
 //* get CPU architecture
 // example:
-//  #if(CUTIL_CPU_ARCH_X86 && CUTIL_CPU_ARCH_64BIT) // x86-64
-//  #if(CUTIL_CPU_ARCH_X86 && CUTIL_CPU_ARCH_32BIT) // x86-32
+//  #if(CUTIL_CPU_ARCH_X86_64) // x86-64
+//  #if(CUTIL_CPU_ARCH_X86_32 && CUTIL_CPU_ARCH_32BIT) // x86-32
 //  #if(CUTIL_CPU_ARCH_ARM && CUTIL_CPU_ARCH_32BIT) // ARMv7, ARMv8-A 32-bit
-#if defined(__x86_64__) || defined(_M_X64) || defined(__amd64) || defined(_M_AMD64) \
- ||	defined(__i386__) || defined(_M_IX86) || defined(__i686__) || defined(_M_I386)
+//  #ifdef(CUTIL_ENDIAN_LITTLE) 	// little-endian
+//  #ifdef(CUTIL_ENDIAN_BIG) 		// big-endian
+#if defined(__x86_64__) || defined(_M_X64) || defined(__amd64__)
 	#define CUTIL_CPU_ARCH_X86				1
-	#define CUTIL_LITTLE_ENDIAN				1
-	#if defined(__x86_64__) || defined(_M_X64) || defined(__amd64) || defined(_M_AMD64)
-		#define CUTIL_CPU_ARCH_X86_64		1
-		#define CUTIL_PTR_SIZE				8
-		#define CUTIL_CPU_ARCH_64BIT		1
-	#elif defined(__i386__) || defined(_M_IX86) || defined(__i686__) || defined(_M_I386)
-		#define CUTIL_CPU_ARCH_X86_32		1
-		#define CUTIL_PTR_SIZE				4
-		#define CUTIL_CPU_ARCH_32BIT		1
+	#define CUTIL_CPU_ARCH_X86_64			1
+	#define CUTIL_ENDIAN_LITTLE				1
+	#define CUTIL_CPU_ARCH_64BIT			1
+#elif defined(__i386__) || defined(_M_IX86)
+	#define CUTIL_CPU_ARCH_X86				1
+	#define CUTIL_CPU_ARCH_X86_32			1
+	#define CUTIL_ENDIAN_LITTLE				1
+	#define CUTIL_CPU_ARCH_32BIT			1
+#elif defined(__aarch64__) || defined(__ARM64__) || defined(_M_ARM64)
+	#define CUTIL_CPU_ARCH_ARM				1
+	#define CUTIL_CPU_ARCH_ARM_64			1
+	#define CUTIL_CPU_ARCH_64BIT			1
+	#if defined(__AARCH64EB__)
+		#define CUTIL_ENDIAN_BIG			1
+	#elif defined(__AARCH64EL__)
+		#define CUTIL_ENDIAN_LITTLE			1
 	#endif
-#elif defined(__arm__) || defined(_M_ARM) || defined(_M_ARM64) || defined(__aarch64__) \
- || defined(__ARM64__) || defined(__TARGET_ARCH_ARM)
-	#define CUTIL_CPU_ARCH_ARM        		1
-	#if defined(__ARMEL__) || defined(_M_ARM64)
-		#define CUTIL_LITTLE_ENDIAN			1
-	#elif defined(__ARMEB__)
-		#define CUTIL_BIG_ENDIAN			1
+#elif defined(__arm__) || defined(_M_ARM)
+	#define CUTIL_CPU_ARCH_ARM				1
+	#define CUTIL_CPU_ARCH_ARM_32        	1
+	#define CUTIL_CPU_ARCH_32BIT			1
+	#if defined(__ARMEB__) || defined(__THUMBEB__)
+		#define CUTIL_ENDIAN_BIG			1
+	#elif defined(__ARMEL__) || defined(__THUMBEL__)
+		#define CUTIL_ENDIAN_LITTLE			1
 	#endif
-	#  if defined(__aarch64__) || defined(__ARM64__) || defined(_M_ARM64)
-		#define CUTIL_CPU_ARCH_ARM64		1
-		#define CUTIL_PTR_SIZE				8
-		#define CUTIL_CPU_ARCH_64BIT		1
-	#else
-		#define CUTIL_CPU_ARCH_ARM32		1
-		#define CUTIL_PTR_SIZE				4
-		#define CUTIL_CPU_ARCH_32BIT		1
-	#endif
-	# if defined(__ARM_ARCH) && __ARM_ARCH > 1
-		#define CUTIL_CPU_ARCH_ARM		__ARM_ARCH
-	#elif defined(__TARGET_ARCH_ARM) && __TARGET_ARCH_ARM > 1
-		#define CUTIL_CPU_ARCH_ARM		__TARGET_ARCH_ARM
-	#elif elif defined(_M_ARM) && _M_ARM > 1
-		#define CUTIL_CPU_ARCH_ARM		_M_ARM
-	#elif defined(__ARM64_ARCH_8__) || defined(__aarch64__) || defined(__ARMv8__) \
-	|| defined(__ARMv8_A__) || defined(_M_ARM64)
-		#define CUTIL_CPU_ARCH_ARM		8
-		#define CUTIL_CPU_ARCH_ARM_V8	1
-	#elif defined(__ARM_ARCH_7__) || defined(__ARM_ARCH_7A__) || defined(__ARM_ARCH_7R__) \
-	|| defined(__ARM_ARCH_7M__) || defined(__ARM_ARCH_7S__)
-		#define CUTIL_CPU_ARCH_ARM		7
-		#define CUTIL_CPU_ARCH_ARM_V7	1
-	#elif defined(__ARM_ARCH_6__) || defined(__ARM_ARCH_6J__) || defined(__ARM_ARCH_6K__) \
-	|| defined(__ARM_ARCH_6Z__) || defined(__ARM_ARCH_6ZK__) || defined(__ARM_ARCH_6T2__) \
-	|| defined(__ARM_ARCH_6M__)
-		#define CUTIL_CPU_ARCH_ARM		6
-		#define CUTIL_CPU_ARCH_ARM_V6	1
-	#elif defined(__ARM_ARCH_5__) || defined(__ARM_ARCH_5T__) || defined(__ARM_ARCH_5E__) \
-	|| defined(__ARM_ARCH_5TE__) || defined(__ARM_ARCH_5TEJ__)
-		#define CUTIL_CPU_ARCH_ARM		5
-		#define CUTIL_CPU_ARCH_ARM_V5	1
-	#else
-		#define CUTIL_CPU_ARCH_ARM		1 // default to ARMv1
-	#endif
-#elif defined(__riscv) || defined(__riscv_xlen) || defined(_M_RISCV)
-	#define CUTIL_CPU_ARCH_RISCV		1
-	#define CUTIL_LITTLE_ENDIAN 		1
-	#if defined(__riscv_xlen) && __riscv_xlen == 64
-		#define CUTIL_PTR_SIZE			8
-		#define CUTIL_CPU_ARCH_64BIT	1
-		#define CUTIL_CPU_ARCH_RISCV64	1
-	#elif
-		#define CUTIL_PTR_SIZE			4
-		#define CUTIL_CPU_ARCH_32BIT	1
-		#define CUTIL_CPU_ARCH_RISCV32	1
-	#endif
-#elif defined(__loongarch64__) || defined(__loongarch__)
-	#define CUTIL_CPU_ARCH_LOONGARCH	1
-	#define CUTIL_LITTLE_ENDIAN 		1
-	#if __loongarch_grlen__ == 64
-		#define CUTIL_PTR_SIZE			8
-		#define CUTIL_CPU_ARCH_64BIT	1
-	#else
-		#define CUTIL_PTR_SIZE			4
-		#define CUTIL_CPU_ARCH_32BIT	1
-	#endif
-#elif defined(__mips__) || defined(__mips64) || defined(_M_MRX000)
-	#define CUTIL_CPU_ARCH_MIPS			1
-	#if defined(__MIPSEL__)
-		#define CUTIL_LITTLE_ENDIAN		1
-	#elif defined(__MIPSEB__)
-		#define CUTIL_BIG_ENDIAN		1
-	#endif
-	#if defined(_MIPS_ARCH_MIPS64) || defined(__mips64)
-		#define CUTIL_PTR_SIZE			8
-		#define CUTIL_CPU_ARCH_64BIT	1
-	#else
-		#define CUTIL_PTR_SIZE			4
-		#define CUTIL_CPU_ARCH_32BIT	1
-	#endif
-#elif defined(__powerpc__) || defined(__ppc__) || defined(__PPC__) || defined(_M_PPC)
-	#define CUTIL_CPU_ARCH_POWERPC		1
-	#define CUTIL_BI_ENDIAN				1
-#elif defined(__s390x__) || defined(__s390__)
-	#define CUTIL_CPU_ARCH_S390			1
 #elif defined(__EMSCRIPTEN__) || defined(__wasm__)
-	#define CUTIL_CPU_ARCH_WASM			1
-	#define CUTIL_LITTLE_ENDIAN			1
+	#define CUTIL_CPU_ARCH_WASM				1
+	#define CUTIL_ENDIAN_LITTLE				1
+	#if defined(__wasm64__)
+		#define CUTIL_CPU_ARCH_WASM_64		1
+		#define CUTIL_CPU_ARCH_64BIT		1
+	#else
+		#define CUTIL_CPU_ARCH_WASM_32		1
+		#define CUTIL_CPU_ARCH_32BIT		1
+	#endif
 #else
-	#define CUTIL_CPU_ARCH_UNKNOWN		1
+	#define CUTIL_CPU_ARCH_UNKNOWN			1
+	#warning "Unknown CPU Architecture"
 #endif
-
+#if !defined(CUTIL_ENDIAN_LITTLE) && !defined(CUTIL_ENDIAN_BIG)
+	#if defined(__BYTE_ORDER__) && (__BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__)
+		#define CUTIL_ENDIAN_LITTLE			1
+	#elif defined(__BYTE_ORDER__) && (__BYTE_ORDER__ == __ORDER_BIG_ENDIAN__)
+		#define CUTIL_ENDIAN_BIG			1
+	#else
+		#define CUTIL_ENDIAN_UNKNOWN		1
+		#warning "Unknown CPU Endianness"
+	#endif
+#endif
 
 
 //* Get OS Type
-#if defined(__ANDROID__)
-    #define CUTIL_OS_ANDROID       1
+#if defined(_WIN32) || defined(_WIN64) || defined(__WIN32__)
+    #define CUTIL_OS_WINDOWS			1
+    #if defined(_WIN64)
+        #define CUTIL_OS_WINDOWS_64		1
+    #else // _WIN32 is defined both for 32-bit and 64-bit Windows
+        #define CUTIL_OS_WINDOWS_32		1
+    #endif
+	#if defined(__CYGWIN__)
+    	#define CUTIL_OS_CYGWIN				1
+	#endif
+#elif defined(__ANDROID__)
+    #define CUTIL_OS_ANDROID			1 	// `CUTIL_OS_LINUX` is also defined
+	#define CUTIL_OS_LINUX				1
+#elif defined(__linux__) || defined(__gnu_linux__) || defined(__linux) || defined(__linux__)
+	#define CUTIL_OS_LINUX				1
 #elif defined(__APPLE__)
     #include <TargetConditionals.h>
-    #if TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR
-        #define CUTIL_OS_IOS       1
-    #elif TARGET_OS_MAC
-        #define CUTIL_OS_MACOS     1
-    #else
-        #define CUTIL_OS_APPLE_UNKNOWN 1
+	#define CUTIL_OS_APPLE				1
+    #if (defined(TARGET_OS_IPHONE) && TARGET_OS_IPHONE) \
+	|| (defined(TARGET_OS_IPHONE_SIMULATOR) && TARGET_OS_IPHONE_SIMULATOR)
+        #define CUTIL_OS_IOS			1
+	#elif defined(TARGET_OS_WATCH) && TARGET_OS_WATCH
+		#define CUTIL_OS_WATCHOS		1
+	#elif defined(TARGET_OS_TV) && TARGET_OS_TV
+		#define CUTIL_OS_TVOS			1
+	#elif defined(TARGET_OS_VISION) && TARGET_OS_VISION
+		#define CUTIL_OS_VISIONOS		1
+    #elif defined(TARGET_OS_MAC) && TARGET_OS_MAC
+        #define CUTIL_OS_MACOS			1
     #endif
-#elif defined(__CYGWIN__)
-    #define CUTIL_OS_CYGWIN        1
-#elif defined(_WIN32) || defined(_WIN64)
-    #define CUTIL_OS_WINDOWS       1
-    #if defined(_WIN64)
-        #define CUTIL_OS_WINDOWS_64    1
-    #else
-        #define CUTIL_OS_WINDOWS_32    1
-    #endif
-	#ifndef __CYGWIN__
-		#define CUTIL_OS_WINDOWS_NOT_CYGWIN 1 // not Cygwin, but Windows native
+#elif defined(__harmony__) || defined(_HARMONYOS) || defined(HARMONYOS)
+	#define CUTIL_OS_HARMONYOS			1
+#endif
+#if !defined(CUTIL_CPU_ARCH_64BIT) && !defined(CUTIL_CPU_ARCH_32BIT)
+	#if defined(__LP64__) || defined(_LP64) || defined(_WIN64) || defined(__x86_64__) \
+	|| defined(__aarch64__) || defined(__powerpc64__) || defined(__mips64) || defined(__wasm64__)
+		#define CUTIL_CPU_ARCH_64BIT			1
+	#else
+		#define CUTIL_CPU_ARCH_32BIT			1
 	#endif
-#elif defined(__linux__) || defined(__gnu_linux__)
-    #define CUTIL_OS_LINUX         1
-#elif defined(__FreeBSD__)
-    #define CUTIL_OS_FREEBSD       1
-#elif defined(__OpenBSD__)
-    #define CUTIL_OS_OPENBSD       1
-#elif defined(__NetBSD__)
-    #define CUTIL_OS_NETBSD        1
-#elif defined(__sun) || defined(__sun__) || defined(__solaris__)
-    #define CUTIL_OS_SOLARIS       1
-#elif defined(_AIX)
-    #define CUTIL_OS_AIX           1
-#elif defined(__hpux) || defined(__hpux__)
-    #define CUTIL_OS_HPUX          1
-#elif defined(__QNX__) || defined(__QNXNTO__)
-    #define CUTIL_OS_QNX           1
-#elif defined(__wasm__) || defined(__wasm32__) || defined(__wasm64__)
-    #define CUTIL_OS_WASM          1
-#elif defined(__unix__) || defined(__unix)
-    #define CUTIL_OS_UNIX          1
-#else
-    #define CUTIL_OS_UNKNOWN       1
 #endif
 
-//* Additional OS family flags
-#if defined(CUTIL_OS_FREEBSD) || defined(CUTIL_OS_OPENBSD) || defined(CUTIL_OS_NETBSD)
-    #define CUTIL_OS_BSD           1
-#endif
-
-#if defined(CUTIL_OS_LINUX) || defined(CUTIL_OS_BSD) || defined(CUTIL_OS_SOLARIS) || \
-    defined(CUTIL_OS_AIX) || defined(CUTIL_OS_HPUX) || defined(CUTIL_OS_QNX) || \
-    defined(CUTIL_OS_UNIX)
-    #define CUTIL_OS_UNIX_LIKE     1
-#endif
+//* get CPU pointer size
+#define CUTIL_PTR_SIZE  	sizeof(void*) // pointer size, 4 or 8 bytes
 
 
 //* get C++ language standard version
@@ -365,22 +323,6 @@ Updated:		9 JUL 2025
 #endif
 
 
-//* include vital C headers
-#ifdef __cplusplus
-	#include <cstdio>
-	#include <cstdlib>
-	#include <cstdint>
-	#include <cfloat>
-	#include <limits> // for epsilon of float
-#else //. !__cplusplus
-	#include <stdio.h>
-	#include <stdlib.h>
-	#include <stdint.h>	// uint32_t
-	#include <float.h>	// floating-point limits
-	#if defined(CUTIL_C99_SUPPORTED) && !defined(CUTIL_C23_SUPPORTED)
-		#include <stdbool.h> // bool support since C99, before C23 (became keyword)
-	#endif
-#endif // __cplusplus
 
 
 //* detect whether build mode is in Debug or Release

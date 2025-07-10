@@ -87,9 +87,13 @@ struct Numbers {
 	static constexpr T min 			= std::numeric_limits<T>::min(); 		//* minimum positive value
 	static constexpr T max 			= std::numeric_limits<T>::max(); 		//* maximum value
 	static constexpr T lowest 		= std::numeric_limits<T>::lowest(); 	//* lowest value, the most negative value
-	static constexpr T denorm_min 	= std::numeric_limits<T>::denorm_min(); //* minimum denormalized value, the smallest positive value that can be represented as a denormalized number
+	static constexpr T denorm_min 	= std::numeric_limits<T>::denorm_min(); //* minimum denormalized value (==0.5), the smallest positive value that can be represented as a denormalized number
 	static constexpr T round_error 	= std::numeric_limits<T>::round_error();//* the maximum error due to rounding
 };
+#if CUTIL_PARAM_USE_SHORTEN_NAMESPACE
+template<typename T>
+using Num = Numbers<T>; // shorter alias
+#endif // CUTIL_PARAM_USE_SHORTEN_NAMESPACE
 
 inline namespace numbers { // inline
 	//* alternatives for C++20 std::numbers
@@ -189,7 +193,9 @@ inline namespace numbers { // inline
 	constexpr long double neg_inf_ld 		= cutil::Numbers<long double>::neg_inf;
 	constexpr long double nan_ld 			= cutil::Numbers<long double>::nan;
 }
-
+#if CUTIL_PARAM_USE_SHORTEN_NAMESPACE
+namespace num = cutil::numbers;  // shorter alias
+#endif // CUTIL_PARAM_USE_SHORTEN_NAMESPACE
 
 
 
@@ -555,12 +561,12 @@ namespace internal{
 	}
 	// in windows MSVC/MinGW, long double is 8-bytes, equals to double
 	inline _CUTIL_CONSTEXPR_CPP20 _CUTIL_FUNC_STATIC
-	bool fequal_ulp_impl(long double a, long double b, uint32_t maxUlpDiff, long_double_8_bytes) noexcept {
+	bool fequal_ulp_impl(long double a, long double b, int32_t maxUlpDiff, long_double_8_bytes) noexcept {
 		return cutil::internal::fequal_ulp_impl<double>(static_cast<double>(a), static_cast<double>(b), maxUlpDiff);
 	}
 	// in linux, long double is 16-bytes
 	inline _CUTIL_FUNC_STATIC
-	bool fequal_ulp_impl(long double a, long double b, uint32_t maxUlpDiff, long_double_16_bytes) noexcept {
+	bool fequal_ulp_impl(long double a, long double b, int32_t maxUlpDiff, long_double_16_bytes) noexcept {
 		static_assert(sizeof(long double) <= 16, "");
 		if(cutil::math::isnan(a) || cutil::math::isnan(b)) {
 			return false; // NaN is not equal to anything, including itself
@@ -568,16 +574,28 @@ namespace internal{
 		if(cutil::math::isinf(a) || cutil::math::isinf(b)) {
 			return (a == b); // +inf == +inf, -inf == -inf, but +inf != -inf, inf != non-inf
 		}
+		
 		constexpr size_t size = 16;
 		std::array<uint64_t, 2> intA {};
 		std::array<uint64_t, 2> intB {};
 		memcpy(intA.data(), &a, size);
 		memcpy(intB.data(), &b, size);
-		if(intA[1]  != intB[1]) {
+	#if defined(CUTIL_ENDIAN_LITTLE)
+		constexpr size_t mantissa_idx {0}; // little-endian
+		constexpr size_t exponent_idx {1};
+	#elif defined(CUTIL_ENDIAN_BIG)
+		constexpr size_t mantissa_idx {1}; // big-endian
+		constexpr size_t exponent_idx {0};
+	#else
+		static_assert(false, "Unknown CPU endianness");
+	#endif
+		// little-endian
+		if(intA[exponent_idx]  != intB[exponent_idx]) {
 			return false;
 		}
-		int64_t diff = cutil::math::abs(static_cast<int64_t>(intA[0]) - static_cast<int64_t>(intB[0]));
+		int64_t diff = cutil::math::abs(static_cast<int64_t>(intA[mantissa_idx]) - static_cast<int64_t>(intB[mantissa_idx]));
 		return (diff <= cutil::math::abs(maxUlpDiff));
+		
 	}
 	
 	
@@ -864,9 +882,7 @@ inline namespace math { // inline
 	// `cutil::fequal_eps(cutil::numbers::pi_3, cutil::math::deg2rad(60.0)) == true`
 	template<typename F, _CUTIL_CONCEPT_FLOAT(F)> _CUTIL_NODISCARD _CUTIL_FUNC_STATIC
 	inline constexpr F deg2rad(F degree) noexcept {
-		if(cutil::math::isnan(degree) || cutil::math::isinf(degree)) {
-			return degree; // NaN or inf, return as is
-		}
+		// no need to check for NaN or inf
 		return (degree * cutil::Numbers<F>::pi / static_cast<F>(180.0));
 	}
 	
@@ -874,9 +890,7 @@ inline namespace math { // inline
 	// `cutil::fequal_eps(60.0, cutil::math::rad2deg(cutil::numbers::pi_3)) == true`
 	template<typename F, _CUTIL_CONCEPT_FLOAT(F)> _CUTIL_NODISCARD _CUTIL_FUNC_STATIC
 	inline constexpr F rad2deg(F radian) noexcept {
-		if(cutil::math::isnan(radian) || cutil::math::isinf(radian)) {
-			return radian; // NaN or inf, return as is
-		}
+		// no need to check for NaN or inf
 		return (radian * static_cast<F>(180.0) / cutil::Numbers<F>::pi);
 	}
 	
@@ -959,9 +973,55 @@ inline namespace math { // inline
 		bool c = cutil::in_range<unsigned int>(-1); // false
 		static_assert(cutil::in_range<size_t>(999), "999 is in range of size_t");
 	*/
-
-
-
+	
+	
+	//* get any digit of a decimal number
+	//    cutil::get_digit(12345, 0)      == 5; // get the last digit
+	//    cutil::get_digit<1>(12345)      == 4; // get the second last digit
+	//    cutil::get_digit(12345, 2)      == 3; // get the third last digit
+	//    cutil::get_digit(12345, -1)     == 0; // get the first digit after the decimal point
+	//    cutil::get_digit(123.456, -1)   == 6; // get the first digit after the decimal point
+	//    cutil::get_digit< -2>(123.456)  == 5; // get the second digit after the decimal point
+	template<typename T, _CUTIL_CONCEPT_INTEGRAL(T)> _CUTIL_NODISCARD
+	constexpr inline uint8_t get_digit(T num, int32_t digit) noexcept {
+		if(digit < 0){
+			return 0;
+		}
+		auto abs_num = cutil::math::abs(num);
+		return static_cast<uint8_t>((abs_num % cutil::math::pow(10, digit + 1)) / cutil::math::pow(10, digit));
+	}
+	template<typename T, _CUTIL_CONCEPT_FLOAT(T)> _CUTIL_NODISCARD
+	constexpr inline uint8_t get_digit(T num, int32_t digit) noexcept {
+		if(digit < 0) { // get the digit after the decimal point
+			auto decimal_part = static_cast<uint32_t>(cutil::math::abs(num) * cutil::math::pow(10, -digit));
+			return static_cast<uint8_t>(decimal_part % 10);
+		}else{ // get the digit before the decimal point
+			auto integer_part = static_cast<uint32_t>(cutil::math::abs(num));
+			return static_cast<uint8_t>((integer_part % cutil::math::pow(10, digit + 1)) / cutil::math::pow(10, digit));
+		}
+	}
+	template<int32_t digit, typename T, _CUTIL_CONCEPT_INTEGRAL(T)> _CUTIL_NODISCARD
+	constexpr inline uint8_t get_digit(T num) noexcept {
+		static_assert(digit >= 0, "digit should be non-negative for integer numbers");
+		auto abs_num = cutil::math::abs(num);
+		return static_cast<uint8_t>((abs_num % cutil::math::pow(10, digit + 1)) / cutil::math::pow(10, digit));
+	}
+	template<int32_t digit, typename T, _CUTIL_CONCEPT_FLOAT(T)> _CUTIL_NODISCARD
+	constexpr inline uint8_t get_digit(T num) noexcept {
+		auto abs_num = cutil::math::abs(num);
+		if (digit < 0) { // get the digit after the decimal point
+			auto decimal_part = static_cast<uint32_t>(abs_num * cutil::math::pow(10, -digit));
+			return static_cast<uint8_t>(decimal_part % 10);
+		}else{ // get the digit before the decimal point
+			auto integer_part = static_cast<uint32_t>(abs_num);
+			return static_cast<uint8_t>((integer_part % cutil::math::pow(10, digit + 1)) / cutil::math::pow(10, digit));
+		}
+	}
+	
+	
+	
+	
+	
 } // namespace math
 
 

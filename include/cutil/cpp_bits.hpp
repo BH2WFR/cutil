@@ -474,7 +474,6 @@ inline namespace bit { // inline
 	}
 	template<typename T, _CUTIL_CONCEPT((std::is_same<T, uint64_t>::value))> _CUTIL_NODISCARD _CUTIL_FUNC_STATIC
 	inline constexpr T byteswap(T num) noexcept {
-
 	#ifdef CUTIL_CPP20_SUPPORTED
 		#ifdef CUTIL_COMPILER_MSVC
 			if (!std::is_constant_evaluated()) {return _byteswap_uint64(num);} // MSVC specific

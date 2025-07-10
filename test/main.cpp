@@ -51,7 +51,8 @@ int main(int argc, char* argv[])
 	std::cout << FLGreen "Hello" FLMagenta " World!" CRst "  -> UTF-8 Test: 中文 한글 🤣\n";
 	fmt::println(FLCyan "     Test For cutil librarys" CRst);
 	// std::getchar();
-	// std::cout << FLRed "ERROR\n" CReset;
+	// std::cout << FLRed "ERROR\	n" CReset;
+	constexpr uint64_t ver = CUTIL_PTR_SIZE;
 	
 	std::atexit([]{
 		fmt::println(FLYellow "EXIT! cpp lang={}" CRst, CUTIL_CPP_LANG);
@@ -1346,6 +1347,50 @@ TEST(Math, others)
 	EXPECT_EQ(cutil::math::factorial<3>(), 6);
 	EXPECT_EQ(cutil::math::factorial<4>(), 24);
 	EXPECT_EQ(cutil::math::factorial<5>(), 120);
+	
+	
+	EXPECT_EQ(cutil::math::get_digit<0>(1234), 4);
+	EXPECT_EQ(cutil::math::get_digit<1>(1234), 3);
+	EXPECT_EQ(cutil::math::get_digit<2>(1234), 2);
+	EXPECT_EQ(cutil::math::get_digit<3>(1234), 1);
+	EXPECT_EQ(cutil::math::get_digit<4>(1234), 0);
+	EXPECT_EQ(cutil::math::get_digit<5>(1234), 0);
+	
+	EXPECT_EQ(cutil::math::get_digit(1234, 0), 4);
+	EXPECT_EQ(cutil::math::get_digit(1234, 1), 3);
+	EXPECT_EQ(cutil::math::get_digit(1234, 2), 2);
+	EXPECT_EQ(cutil::math::get_digit(1234, 3), 1);
+	EXPECT_EQ(cutil::math::get_digit(1234, 4), 0);
+	EXPECT_EQ(cutil::math::get_digit(1234, 5), 0);
+	
+	EXPECT_EQ(cutil::math::get_digit< -6>(1234.5678), 0);
+	EXPECT_EQ(cutil::math::get_digit< -5>(1234.5678), 0);
+	EXPECT_EQ(cutil::math::get_digit< -4>(1234.5678), 8);
+	EXPECT_EQ(cutil::math::get_digit< -3>(1234.5678), 7);
+	EXPECT_EQ(cutil::math::get_digit< -2>(1234.5678), 6);
+	EXPECT_EQ(cutil::math::get_digit< -1>(1234.5678), 5);
+	EXPECT_EQ(cutil::math::get_digit<0>(1234.5678), 4);
+	EXPECT_EQ(cutil::math::get_digit<1>(1234.5678), 3);
+	EXPECT_EQ(cutil::math::get_digit<2>(1234.5678), 2);
+	EXPECT_EQ(cutil::math::get_digit<3>(1234.5678), 1);
+	EXPECT_EQ(cutil::math::get_digit<4>(1234.5678), 0);
+	EXPECT_EQ(cutil::math::get_digit<5>(1234.5678), 0);
+	
+	EXPECT_EQ(cutil::math::get_digit(1234.5678, -6), 0);
+	EXPECT_EQ(cutil::math::get_digit(1234.5678, -5), 0);
+	EXPECT_EQ(cutil::math::get_digit(1234.5678, -4), 8);
+	EXPECT_EQ(cutil::math::get_digit(1234.5678, -3), 7);
+	EXPECT_EQ(cutil::math::get_digit(1234.5678, -2), 6);
+	EXPECT_EQ(cutil::math::get_digit(1234.5678, -1), 5);
+	EXPECT_EQ(cutil::math::get_digit(1234.5678, 0), 4);
+	EXPECT_EQ(cutil::math::get_digit(1234.5678, 1), 3);
+	EXPECT_EQ(cutil::math::get_digit(1234.5678, 2), 2);
+	EXPECT_EQ(cutil::math::get_digit(1234.5678, 3), 1);
+	EXPECT_EQ(cutil::math::get_digit(1234.5678, 4), 0);
+	EXPECT_EQ(cutil::math::get_digit(1234.5678, 5), 0);
+	
+	
+	
 	
 }
 
