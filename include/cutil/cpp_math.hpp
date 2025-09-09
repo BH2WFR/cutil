@@ -674,6 +674,8 @@ namespace internal{
 			return static_cast<R>(base * tmp * tmp);
 		}
 	}
+#else // C++14
+	
 #endif // C++17
 	
 	
@@ -1009,7 +1011,7 @@ inline namespace math { // inline
 	template<int32_t digit, typename T, _CUTIL_CONCEPT_FLOAT(T)> _CUTIL_NODISCARD
 	constexpr inline uint8_t get_digit(T num) noexcept {
 		auto abs_num = cutil::math::abs(num);
-		if (digit < 0) { // get the digit after the decimal point
+		if _CUTIL_CONSTEXPR_CPP17 (digit < 0) { // get the digit after the decimal point
 			auto decimal_part = static_cast<uint32_t>(abs_num * cutil::math::pow(10, -digit));
 			return static_cast<uint8_t>(decimal_part % 10);
 		}else{ // get the digit before the decimal point

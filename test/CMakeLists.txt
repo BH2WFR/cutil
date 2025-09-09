@@ -11,7 +11,7 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 	add_compile_options("/diagnostics:caret")
 	# add_compile_options("/Zc:preprocessor")
 	add_compile_options("/fsanitize=address") # asan for msvc, needs to compile gtest with asan too
-	add_compile_options("/permissive-")
+	# add_compile_options("/permissive-")
 else()
 	# add_compile_options("-std=c++2b")
 	add_compile_options("-fno-omit-frame-pointer")
