@@ -15,6 +15,7 @@
 				"args": [ //* 启动命令行参数
 					
 				],
+				// "externalConsole": false, // 内部, 外部终端
 				"stopAtEntry": false,
 				"cwd": "${command:cmake.launchTargetDirectory}",
 				"console": "integratedTerminal", // 内部, 外部终端
@@ -55,7 +56,7 @@
 				],
 				"stopAtEntry": false,
 				"cwd": "${command:cmake.launchTargetDirectory}",
-				"externalConsole": true, // 内部, 外部终端
+				// "externalConsole": false, // 内部, 外部终端
 				// "MIMode": "gdb",
 				// "miDebuggerPath": "gdb.exe",  // 确保路径正确
 				"logging": {
