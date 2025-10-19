@@ -1681,5 +1681,5 @@ TEST(Convert, Overload)
 	EXPECT_EQ(13, (c.*cutil::overload<int>(&ConvertTestClass::func2))(1));
 	EXPECT_EQ(14, (c.*cutil::overload<double>(&ConvertTestClass::func2))(1.0));
 	EXPECT_EQ(15, (c.*cutil::overload<int, double>(&ConvertTestClass::func2))(1, 1.0));
-	
+	std::as_const(13);
 }
