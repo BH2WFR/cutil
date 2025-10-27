@@ -6,6 +6,15 @@ Updated:		9 JUL 2025
 * You can include this header in header files.
 */
 
+//* check if some headers are included (this must be placed before include guard)
+#if defined(__cplusplus) && defined(FMT_VERSION) && (CUTIL_FMT_INCLUDED == 0)
+	#define CUTIL_FMT_INCLUDED		1
+#endif
+#if (_WIN32 == 1) && (defined(_WINDOWS_) || defined(WINAPI)) && (CUTIL_WINAPI_INCLUDED == 0)
+	#define CUTIL_WINAPI_INCLUDED	1
+#endif
+
+//* INCLUDE GUARD
 #ifndef CUTIL_BASE_BASE_H__
 #define CUTIL_BASE_BASE_H__
 
@@ -456,14 +465,6 @@ Updated:		9 JUL 2025
 	#ifdef min
 		#undef min
 	#endif
-#endif
-
-//* check if headers are included
-#if defined(__cplusplus) && defined(FMT_VERSION)
-	#define CUTIL_FMT_INCLUDED		1
-#endif
-#if (CUTIL_OS_WINDOWS == 1) && (defined(_WINDOWS_) || defined(WINAPI))
-	#define CUTIL_WINAPI_INCLUDED	1
 #endif
 
 
