@@ -195,7 +195,7 @@ Reference of Ansi Escape Codes:
   **cutil\:\:non_const_overload<...>(&function)**
   
   > for **member functions with const overload**
-  > 有 const 重载的成员函数 
+  > 有 const 重载的成员函数
   
   ```c++
   EXPECT_EQ(0, (c.*cutil::non_const_overload<>(&ConvertTestClass::func))());

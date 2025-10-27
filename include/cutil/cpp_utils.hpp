@@ -322,7 +322,13 @@ inline namespace type {
 	// const A* pa3 = cutil::safe_cast<const A*>(pa.get()); // ERROR
 	// A* pa4 = cutil::safe_cast<A*>(const_cast<Base*>(pa.get())); // ERROR
 */
-
+	
+	//* std::as_const implementation for C++14
+	template <typename T>
+	inline constexpr std::add_const_t<T>& as_const(T& t) noexcept {
+		return t;
+	}
+	
 } // namespace type
 
 namespace internal {
